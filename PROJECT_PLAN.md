@@ -45,9 +45,9 @@ Competing officially — registering on Kaggle and submitting to the real leader
 
 ## 4. Success Metrics
 
-- **Competition metric:** to confirm exactly from the Kaggle "Evaluation" tab once
-  data access is set up (typically a mean AUC or mean average precision across the
-  12 labels for challenges like this) — first task in Week 1.
+- **Competition metric (confirmed):** macro-averaged AUC-ROC across the twelve
+  targets — i.e. compute AUC-ROC separately for each of the 12 labels, then average
+  the 12 scores. `Final Score = (1/12) * sum(AUC_i for i in 1..12)`.
 - **Personal bar:** a working end-to-end pipeline, at least one submission on the
   leaderboard, a model that clearly beats a naive baseline (e.g. predicting the
   label base rates), and a written report explaining what worked and what didn't.
@@ -105,21 +105,43 @@ prediction, extended here to 12 simultaneous binary outputs instead of one.
 - A results write-up: what worked, what didn't, per-abnormality performance, and
   what you'd try next with more time
 
-## 8. Risks / Open Questions to Resolve Early
+## 8. Confirmed Dataset & Competition Details (as of Sept 16, 2026)
 
-- Confirm the exact 12 abnormalities and the official evaluation metric from the
-  Kaggle "Data" and "Evaluation" tabs directly (not fully visible without being
-  logged in) — do this in the first Kaggle session.
-- MRI data volume is likely large (tens to hundreds of GB) — plan to do most
-  training inside Kaggle Notebooks (free GPU quota, data pre-mounted there) rather
-  than downloading everything to a laptop.
+- **The 12 targets:** ACL (anterior cruciate ligament injury), MCL (medial
+  collateral ligament injury), Medial Meniscus tear, Lateral Meniscus tear, Medial
+  OA (osteoarthritis), Lateral OA, PF OA (patellofemoral osteoarthritis), Effusion,
+  Synovitis, Baker's cyst, Contusion (bone bruise), Fracture. Each is a binary
+  0/1 label per study; a study can have multiple.
+- **Dataset size: 569.76 GB, ~819,640 DICOM files.** This will NOT be downloaded to
+  the laptop. Development happens primarily in **Kaggle Notebooks**, where the data
+  is already mounted and free GPU quota is available.
+- **Important nuance:** only a small subset of training studies have per-condition
+  labels directly; the rest only have the free-text radiology report. Part of the
+  real challenge is deciding how to use those unlabeled-but-reported studies (e.g.
+  deriving labels from the report text) — first EDA task is to quantify exactly how
+  many studies are labeled vs. report-only.
+- **This is a Code Competition:** you don't just upload a predictions CSV — your
+  actual training/inference notebook must run *inside* Kaggle (CPU or GPU, ≤9 hours
+  runtime, internet disabled during the scored run, submission file must be named
+  `submission.csv`). Pretrained models and public external data are allowed.
+- Series are organized by anatomical plane (Sagittal / Coronal / Axial) with flags
+  for fluid-sensitive and fat-suppressed sequences — relevant to the Phase 2
+  multi-view plan.
+- **Prizes:** Main leaderboard — 10 places, $9,000 down to $5,000. Efficiency track
+  — 3 places, $7,000 / $6,000 / $5,000.
+
+## 9. Risks / Open Questions
+
 - DICOM/medical imaging tooling (pydicom, MONAI) has a learning curve — budget real
   time for this in Week 1, don't skip straight to modeling.
 - Multilabel classification with imbalanced classes is genuinely harder than
   single-label problems — a mediocre Week 2 baseline score is normal and expected
   before the Phase 2/3 improvements land.
+- The labeled-vs-report-only data split could change the whole approach (pure
+  supervised vs. semi-supervised using the reports) — resolve this with EDA before
+  committing to an architecture.
 
-## 9. Learning Approach
+## 10. Learning Approach
 
 This is a first major project and a genuine learning opportunity, not just a
 resume line. Ground rules for how we'll work:
