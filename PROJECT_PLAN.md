@@ -118,3 +118,17 @@ prediction, extended here to 12 simultaneous binary outputs instead of one.
 - Multilabel classification with imbalanced classes is genuinely harder than
   single-label problems — a mediocre Week 2 baseline score is normal and expected
   before the Phase 2/3 improvements land.
+
+## 9. Learning Approach
+
+This is a first major project and a genuine learning opportunity, not just a
+resume line. Ground rules for how we'll work:
+
+- Every new tool or concept (git, Kaggle, DICOM, CNNs, evaluation metrics, etc.)
+  gets a plain-language explanation *before* we use it, not just the command to
+  run.
+- Decisions get explained, not just made — why a stratified split, why transfer
+  learning, why this loss function.
+- `docs/LEARNING_LOG.md` tracks what was learned and any mistakes/debugging along
+  the way, in your own words where possible. This doubles as great interview
+  material later ("tell me about a time you were stuck on a project").
