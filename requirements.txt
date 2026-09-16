@@ -1,0 +1,24 @@
+# Core
+numpy
+pandas
+scikit-learn
+matplotlib
+seaborn
+
+# Deep learning
+torch
+torchvision
+timm
+
+# Medical imaging
+pydicom
+monai
+opencv-python
+
+# Augmentation
+albumentations
+
+# Experiment utilities
+tqdm
+jupyter
+kaggle
