@@ -130,7 +130,49 @@ prediction, extended here to 12 simultaneous binary outputs instead of one.
 - **Prizes:** Main leaderboard — 10 places, $9,000 down to $5,000. Efficiency track
   — 3 places, $7,000 / $6,000 / $5,000.
 
-## 9. Risks / Open Questions
+## 9. EDA Findings & Label Extraction Strategy (Sept 19, 2026)
+
+**Label availability (critical finding):** Of 4,407 training studies, only **58
+(1.3%)** have real, directly-provided labels. The remaining 4,349 (98.7%) have only
+the radiology report text. This means the original plan (fine-tune a CNN directly
+on labeled studies) isn't viable as-is — 58 examples is far too few to train a
+12-label multilabel model. The real task is **weak supervision**: derive labels
+from report text at scale, using the 58 gold-labeled studies as a validation set to
+check extraction quality, not as training data.
+
+**Report text characteristics:**
+- Length is right-skewed: mean 1,098 characters, median 977, range 52-4,743.
+- Reports often follow a template with labeled sections (e.g. Spanish reports use
+  "Técnica/Resultados/Impresión" or "Hallazgos/Impresión"); the "Impression"
+  section is typically the cleanest summary of the final diagnosis, versus
+  "Findings" which lists normal results too.
+- **Negation is pervasive and critical to handle** — e.g. "sin caracteres propios
+  de rotura" (without characteristics of tear), "No hay evidente derrame articular"
+  (no evident effusion). A naive keyword search would misclassify these as positive
+  findings. Any extraction approach must handle negation explicitly.
+- **9 languages detected** (automatic language detection on all 4,407 reports):
+  English (1,736, 39%), Spanish (682), Turkish (546), Croatian (406), Greek (321),
+  German (262), Bulgarian (220), Dutch (153), French (81). No single language
+  covers a majority of the data.
+
+**Label extraction strategy (staged, decided Sept 19):**
+1. **Stage 1 (build first):** rule/keyword-based extractor with explicit negation
+   handling, built and validated on the 1,736 English reports only (validated
+   against the English subset of the 58 gold-labeled studies).
+2. **Stage 2 (scale):** translate non-English reports to English using an
+   offline-capable pretrained translation model — must work without internet,
+   since the final scored competition submission runs with internet disabled —
+   then reuse the Stage 1 pipeline unchanged.
+3. **Stage 3 (stretch):** evaluate a more powerful multilingual model that reads
+   reports directly without a separate translation step, and compare its accuracy
+   against the Stage 1-2 pipeline.
+
+This replaces the Phase 1 assumption in Section 5 above (which assumed enough
+direct labels to fine-tune a CNN right away) — label derivation now comes first,
+image modeling follows once derived labels exist for a large enough set of
+studies.
+
+## 10. Risks / Open Questions
 
 - DICOM/medical imaging tooling (pydicom, MONAI) has a learning curve — budget real
   time for this in Week 1, don't skip straight to modeling.
@@ -141,7 +183,7 @@ prediction, extended here to 12 simultaneous binary outputs instead of one.
   supervised vs. semi-supervised using the reports) — resolve this with EDA before
   committing to an architecture.
 
-## 10. Learning Approach
+## 11. Learning Approach
 
 This is a first major project and a genuine learning opportunity, not just a
 resume line. Ground rules for how we'll work:
